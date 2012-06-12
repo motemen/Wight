@@ -1,0 +1,3 @@
+[submodule "poltergeist"]
+	path = poltergeist
+	url = git://github.com/jonleighton/poltergeist.git
