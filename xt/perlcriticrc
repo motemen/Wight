@@ -1,0 +1,12 @@
+[TestingAndDebugging::ProhibitNoStrict]
+allow=refs
+
+[-Subroutines::ProhibitExplicitReturnUndef]
+
+[-Subroutines::ProhibitSubroutinePrototypes]
+
+[TestingAndDebugging::RequireUseStrict]
+equivalent_modules = Moose Mouse Any::Moose
+
+[TestingAndDebugging::RequireUseWarnings]
+equivalent_modules = Moose Mouse Any::Moose
