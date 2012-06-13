@@ -42,6 +42,7 @@ is $wight->current_url, "http://localhost:$port/foo";
 
 my $hidden = $wight->find(q<id('hidden')>);
 ok !$hidden->is_visible;
+is $hidden->attribute('id'), 'hidden';
 
 $wight->find('//span[@onclick]')->click;
 ok $wight->wait_until(sub { $hidden->is_visible });

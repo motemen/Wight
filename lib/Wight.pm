@@ -45,7 +45,7 @@ our @METHODS = qw(
     visit execute evaluate current_url render
 );
 # TODO poltergeist has these methods:
-# body, source, attribute, value, select_file, tag_name,
+# body, source, value, select_file, tag_name,
 # within_frame, drag, select, trigger,
 # reset, resize
 

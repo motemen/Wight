@@ -12,7 +12,7 @@ use Class::Accessor::Lite (
 );
 
 our @METHODS = qw(
-    click set text visible
+    click set text visible attribute
 );
 
 foreach my $method (@METHODS) {
