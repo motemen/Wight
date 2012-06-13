@@ -20,7 +20,7 @@ use JSON::XS;
 
 use File::Basename qw(dirname);
 use File::Spec::Functions qw(catfile updir);
-use File::ShareDir qw(module_file);
+use File::ShareDir qw(dist_file);
 
 use Carp;
 use Sub::Name;
@@ -55,9 +55,11 @@ sub _build_cookie_jar {
 }
 
 sub script_file {
-    my @path = qw(poltergeist lib capybara poltergeist client compiled main.js);
-    my $file = catfile(dirname(__FILE__), updir, @path);
-    return -e $file ? $file : module_file(__PACKAGE__, join '/', @path);
+    my $file = catfile(
+        dirname(__FILE__), updir,
+        qw(share main.js),
+    );
+    return -e $file ? $file : dist_file(__PACKAGE__, 'main.js');
 }
 
 sub test { Test::Builder->new }

@@ -42,4 +42,25 @@ auto_include_deps;
 
 readme_from 'lib/Wight.pm';
 
+if ($Module::Install::AUTHOR) {
+    require Path::Class;
+
+    my $poltergeist = Path::Class::dir('poltergeist');
+    my $share = Path::Class::dir('share');
+    my $license = $poltergeist->file('LICENSE')->slurp;
+    my $js_dir = $poltergeist->subdir(qw(
+        lib capybara poltergeist client compiled
+    ));
+    foreach my $js ($js_dir->children) {
+        my $out = $share->file($js->basename);
+        $out->dir->mkpath(1);
+        $out->openw->print(
+            "/*\n$license*/\n\n",
+            $js->slurp
+        );
+    }
+}
+
+install_share 'share';
+
 WriteAll;
