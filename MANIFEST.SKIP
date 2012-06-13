@@ -22,3 +22,8 @@
 \.prove$
 ^MYMETA\.
 Debian_CPANTS.txt
+^local/
+^carton\.lock$
+^\.carton/
+^cover_db/
+^poltergeist/
