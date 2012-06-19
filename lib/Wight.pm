@@ -43,11 +43,9 @@ our $VERSION = '0.01';
 
 our @METHODS = qw(
     visit execute evaluate current_url render
+    body source reset resize push_frame pop_frame exit
 );
-# TODO poltergeist has these methods:
-# body, source, value, select_file, tag_name,
-# within_frame, drag, select, trigger,
-# reset, resize
+# within_frame
 
 sub _build_cookie_jar {
     require HTTP::Cookies;

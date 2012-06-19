@@ -12,7 +12,8 @@ use Class::Accessor::Lite (
 );
 
 our @METHODS = qw(
-    click set text visible attribute
+    click set text visible attribute value
+    tag_name drag select trigger select_file
 );
 
 foreach my $method (@METHODS) {
