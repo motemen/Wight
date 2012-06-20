@@ -289,13 +289,102 @@ __END__
 
 =head1 NAME
 
-Wight - 
+Wight - Communicate with PhantomJS
 
 =head1 SYNOPSIS
 
   use Wight;
 
+  my $wight = Wight->new;
+
+  $wight->spawn_psgi('app.psgi');
+  $wight->handshake;
+
+  $wight->visit('/');
+  $wight->evaluate('document.title'); # => evaluates JavaScript expression
+
+  $wight->find('//a[@rel="next"]')->click;
+
 =head1 DESCRIPTION
+
+Wight provides methods for operating PhantomJS from Perl,
+especially intended to be used testing web application.
+
+For client side scripting, uses L<poltergeist|https://github.com/jonleighton/poltergeist>'s JavaScript.
+
+=head1 BROWSER METHODS
+
+Every method croaks if the operation was failed.
+
+=over 4
+
+=item $wight->visit($path)
+
+Opens a web page.
+
+=item my $result = $wight->evaluate($javascript_expression)
+
+Evaluates a JavaScript expression and returns its result.
+
+=item $wight->execute($javascript_statement)
+
+Executes JavaScript statements.
+
+=item my $node  = $wight->find($xpath)
+
+=item my @nodes = $wight->find($xpath)
+
+Finds a node within current page and returns a (list of) L<Wight::Node>.
+
+=item $wight->render($file)
+
+Renders current page to local file.
+
+=back
+
+=head1 NODE METHODS
+
+Every method croaks if the operation was failed.
+
+=over 4
+
+=item $node->click
+
+=item my $text = $node->text
+
+=item $node->set($value)
+
+=back
+
+=head1 INITIALIZATION METHODS
+
+=over 4
+
+=item my $port = $wight->spawn_psgi($file_or_code)
+
+Forks and runs specified PSGI application.
+Sets its C<base_url> to "http://localhost:I<$port>/".
+
+=item $wight->handshake
+
+Starts PhantomJS and waits for communication established.
+After this, you can call BROWSER METHODS above.
+
+=item $wight->base_url($url);
+
+=back
+
+=head1 UTILITY METHODS
+
+=over 4
+
+=item $wight->sleep($secs)
+
+=item $wight->wait_until(\&code)
+
+Stops execution until C<code> returns a true value.
+
+=back
 
 =head1 AUTHOR
 
@@ -303,9 +392,34 @@ motemen E<lt>motemen@gmail.comE<gt>
 
 =head1 SEE ALSO
 
+L<poltergeist|https://github.com/jonleighton/poltergeist>
+
 =head1 LICENSE
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
+
+For JavaScripts from poltergeist:
+
+Copyright (c) 2011 Jonathan Leighton
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 =cut

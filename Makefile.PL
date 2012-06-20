@@ -44,9 +44,10 @@ requires_external_bin 'phantomjs';
 auto_set_repository;
 auto_include_deps;
 
-readme_from 'lib/Wight.pm';
+readme_markdown_from 'lib/Wight.pm';
 
 if ($Module::Install::AUTHOR) {
+    # Insert LICENSE to javascripts
     require Path::Class;
 
     my $poltergeist = Path::Class::dir('poltergeist');
@@ -63,6 +64,9 @@ if ($Module::Install::AUTHOR) {
             $js->slurp
         );
     }
+
+    require File::Copy;
+    File::Copy::mv('README.mkdn', 'README.md');
 }
 
 install_share 'share';
