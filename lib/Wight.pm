@@ -47,6 +47,8 @@ our @METHODS = qw(
 );
 # within_frame
 
+our @CARP_NOT = 'Wight::Node';
+
 sub _build_cookie_jar {
     require HTTP::Cookies;
     HTTP::Cookies->new;
@@ -160,11 +162,11 @@ sub _on_read_cb {
             my $data = JSON::XS->new->decode($message);
             $self->debug('message in:', $data);
             if (my $error = $data->{error}) {
-                $self->test->diag("error: $error->{name}");
-                $self->test->diag(
-                    $self->test->explain($error->{args})
-                );
-                exit 1;
+                if ($self->client_cv) {
+                    $self->client_cv->croak($error);
+                }
+                $self->{handle}->destroy;
+                return;
             }
             $self->client_cv->send($data) if $self->client_cv;
         }
@@ -181,7 +183,8 @@ sub call {
     my $frame = $self->_new_ws_frame(encode_json $message);
     $self->handle->push_write($frame->to_bytes);
 
-    my $res = $self->client_cv(AE::cv)->recv;
+    my $res = eval { $self->client_cv(AE::cv)->recv };
+    croak $self->test->explain($@) if $@;
 
     unless (exists $res->{response}) {
         croak $self->test->explain($res->{error});
