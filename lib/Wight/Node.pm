@@ -27,7 +27,7 @@ foreach my $method (@METHODS) {
 
 *is_visible = \&visible;
 
-sub find_within {
+sub find {
     my ($self, $selector) = @_;
     my $class = ref $self;
     my $id = $self->wight->call(find_within => $self->page_id, $self->id, $selector) or return;
