@@ -22,11 +22,14 @@ use File::Basename qw(dirname);
 use File::Spec::Functions qw(catfile updir);
 use File::ShareDir qw(dist_file);
 
+use URI;
+
 use Carp;
 use Sub::Name;
 
 use Class::Accessor::Lite::Lazy (
     rw => [
+        'psgi_port',
         'client_cv',
     ],
     ro => [
@@ -36,13 +39,14 @@ use Class::Accessor::Lite::Lazy (
     ],
     rw_lazy => [
         'cookie_jar',
+        'base_url',
     ],
 );
 
 our $VERSION = '0.01';
 
 our @METHODS = qw(
-    visit execute evaluate current_url render
+    execute evaluate render
     body source reset resize push_frame pop_frame exit
 );
 # within_frame
@@ -52,6 +56,16 @@ our @CARP_NOT = 'Wight::Node';
 sub _build_cookie_jar {
     require HTTP::Cookies;
     HTTP::Cookies->new;
+}
+
+sub _build_base_url {
+    my $self = shift;
+
+    croak q('psgi_port' not set) unless defined $self->psgi_port;
+
+    my $url = URI->new('http://localhost/');
+       $url->port($self->psgi_port);
+    return $url;
 }
 
 sub script_file {
@@ -202,6 +216,19 @@ sub sleep {
     Coro::AnyEvent::sleep($n);
 }
 
+sub visit {
+    my ($self, $url) = @_;
+    return $self->call(
+        visit => URI->new_abs($url, $self->base_url)->as_string
+    );
+}
+
+sub current_url {
+    my $self = shift;
+    my $url = $self->call('current_url');
+    return URI->new($url);
+}
+
 foreach my $method (@METHODS) {
     my $code = sub {
         my ($self, @args) = @_;
@@ -250,7 +277,10 @@ sub spawn_psgi {
         }
     );
 
-    return $self->{test_tcp}->port;
+    my $port = $self->{test_tcp}->port;
+    $self->{psgi_port} ||= $port;
+
+    return $port;
 }
 
 1;

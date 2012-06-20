@@ -23,6 +23,8 @@ requires 'File::Basename';
 requires 'File::Spec::Functions';
 requires 'File::ShareDir';
 
+requires 'URI';
+
 requires 'Carp';
 requires 'Sub::Name';
 
