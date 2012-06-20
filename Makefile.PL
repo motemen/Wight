@@ -39,6 +39,8 @@ requires 'File::Temp';
 
 test_requires 'Test::More';
 
+requires_external_bin 'phantomjs';
+
 auto_set_repository;
 auto_include_deps;
 
