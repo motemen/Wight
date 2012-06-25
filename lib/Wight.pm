@@ -179,8 +179,8 @@ sub _on_read_cb {
                 if ($self->client_cv) {
                     $self->client_cv->croak($error);
                 }
-                $self->{handle}->destroy;
-                return;
+                # $self->{handle}->destroy;
+                # return;
             }
             $self->client_cv->send($data) if $self->client_cv;
         }
