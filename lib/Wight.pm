@@ -382,7 +382,7 @@ After this, you can call BROWSER METHODS above.
 
 =item $wight->wait_until(\&code)
 
-Stops execution until C<code> returns a true value.
+Stops execution until I<code> returns a true value.
 
 =back
 

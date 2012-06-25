@@ -75,7 +75,7 @@ After this, you can call BROWSER METHODS above.
 - $wight->sleep($secs)
 - $wight->wait\_until(\\&code)
 
-Stops execution until `code` returns a true value.
+Stops execution until _code_ returns a true value.
 
 # AUTHOR
 
