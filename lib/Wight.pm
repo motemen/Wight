@@ -5,7 +5,7 @@ use 5.008_001;
 use Wight::Node;
 
 use Test::Builder;
-use Test::TCP;
+use Test::TCP qw(empty_port);
 
 use Coro;
 use Coro::AnyEvent;
@@ -224,6 +224,9 @@ sub call {
 
 sub debug {
     my $self = shift;
+#   $self->test->note(
+#       $self->test->explain(@_)
+#   );
 }
 
 sub sleep {
@@ -279,12 +282,11 @@ sub wait_until {
 sub spawn_psgi {
     my ($self, $app, %options) = @_;
 
-    require Plack::Runner;
-
-    $self->{test_tcp} = Test::TCP->new(
-        code => sub {
+    my $port = $self->test_tcp(
+        sub {
             my $port = shift;
 
+            require Plack::Runner;
             my $runner = Plack::Runner->new(app => $app);
             $runner->parse_options('--port' => $port, '--env' => 'test');
             $runner->set_options(%options);
@@ -292,10 +294,18 @@ sub spawn_psgi {
         }
     );
 
-    my $port = $self->{test_tcp}->port;
     $self->{psgi_port} ||= $port;
 
     return $port;
+}
+
+sub test_tcp {
+    my ($self, $cb) = @_;
+    my $test_tcp = Test::TCP->new(
+        code => $cb,
+    );
+    $self->{test_tcp}->{ $test_tcp->port } = $test_tcp; # keep reference
+    return $test_tcp->port;
 }
 
 1;
