@@ -76,6 +76,14 @@ sub script_file {
     return -e $file ? $file : dist_file(__PACKAGE__, 'main.js');
 }
 
+sub phantomjs_args {
+    my $self = shift;
+    if (@_) {
+        $self->{phantomjs_args} = [ @_ ];
+    }
+    return @{ $self->{phantomjs_args} || [] };
+}
+
 sub test { Test::Builder->new }
 
 sub new {
@@ -113,7 +121,7 @@ sub run {
     $self->{phantomjs_cv} = run_cmd [
         'phantomjs',
         '--disk-cache=yes',
-        '--load-images=no',
+        $self->phantomjs_args,
         $cookies_file ? "--cookies-file=$cookies_file" : (),
         $self->script_file,
         $self->ws_port,
