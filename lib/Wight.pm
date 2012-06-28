@@ -151,6 +151,13 @@ sub _tcp_server_cb {
         $self->{handle} = AnyEvent::Handle->new(
             fh => $sock,
             on_read => $self->_on_read_cb,
+            on_error => sub {
+                my ($handle, $fatal, $msg) = @_;
+                $handle->destroy;
+                if ($self->client_cv) {
+                    $self->client_cv->croak($msg);
+                }
+            }
         );
     };
 }
