@@ -4,7 +4,6 @@ use warnings;
 use 5.008_001;
 use Wight::Node;
 
-use Test::Builder;
 use Test::TCP qw(empty_port);
 
 use Coro;
@@ -83,8 +82,6 @@ sub phantomjs_args {
     }
     return @{ $self->{phantomjs_args} || [] };
 }
-
-sub test { Test::Builder->new }
 
 sub new {
     my ($class, %args) = @_;
@@ -213,20 +210,14 @@ sub call {
     $self->handle->push_write($frame->to_bytes);
 
     my $res = eval { $self->client_cv(AE::cv)->recv };
-    croak $self->test->explain($@) if $@;
-
-    unless (exists $res->{response}) {
-        croak $self->test->explain($res->{error});
-    }
+    croak $@ if $@;
+    croak $res->{error} unless exists $res->{response};
 
     return $res->{response};
 }
 
 sub debug {
     my $self = shift;
-#   $self->test->note(
-#       $self->test->explain(@_)
-#   );
 }
 
 sub sleep {
@@ -277,35 +268,6 @@ sub wait_until {
     my $result;
     $self->sleep(0.5) until $result = $code->();
     return $result;
-}
-
-sub spawn_psgi {
-    my ($self, $app, %options) = @_;
-
-    my $port = $self->test_tcp(
-        sub {
-            my $port = shift;
-
-            require Plack::Runner;
-            my $runner = Plack::Runner->new(app => $app);
-            $runner->parse_options('--port' => $port, '--env' => 'test');
-            $runner->set_options(%options);
-            $runner->run;
-        }
-    );
-
-    $self->{psgi_port} ||= $port;
-
-    return $port;
-}
-
-sub test_tcp {
-    my ($self, $cb) = @_;
-    my $test_tcp = Test::TCP->new(
-        code => $cb,
-    );
-    $self->{test_tcp}->{ $test_tcp->port } = $test_tcp; # keep reference
-    return $test_tcp->port;
 }
 
 1;

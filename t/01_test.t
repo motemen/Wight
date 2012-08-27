@@ -2,9 +2,9 @@ use strict;
 use warnings;
 use Test::More;
 
-use Wight;
+use Test::Wight;
 
-my $wight = Wight->new;
+my $wight = Test::Wight->new;
 
 my $app = sub {
     return [ 200, [ 'Content-Type' => 'text/html' ], [ <<HTML ] ];
