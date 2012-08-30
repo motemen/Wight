@@ -161,6 +161,7 @@ sub _tcp_server_cb {
 
 sub _on_read_cb {
     my $self = shift;
+    my $frame;
 
     return unblock_sub {
         my $handle = shift;
@@ -180,8 +181,7 @@ sub _on_read_cb {
             }
         }
 
-        my $frame = $self->_new_ws_frame;
-
+        $frame ||= $self->_new_ws_frame;
         $frame->append($chunk);
 
         while (my $message = $frame->next) {
