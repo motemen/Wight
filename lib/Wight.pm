@@ -25,6 +25,7 @@ use URI;
 
 use Carp;
 use Sub::Name;
+use Scalar::Util qw(blessed);
 
 use Class::Accessor::Lite::Lazy (
     rw => [
@@ -46,7 +47,7 @@ our $VERSION = '0.01';
 
 our @METHODS = qw(
     execute evaluate render
-    body source reset resize push_frame pop_frame exit
+    body source reset resize push_frame pop_frame
 );
 # within_frame
 
@@ -144,7 +145,14 @@ sub _tcp_server_cb {
                 if ($self->client_cv) {
                     $self->client_cv->croak($msg);
                 }
-            }
+            },
+            on_eof => sub {
+                my ($handle) = @_;
+                $handle->destroy;
+                if ($self->client_cv) {
+                    $self->client_cv->croak(Wight::Exception->eof);
+                }
+            },
         );
     };
 }
@@ -200,7 +208,18 @@ sub call {
     $self->handle->push_write($frame->to_bytes);
 
     my $res = eval { $self->client_cv(AE::cv)->recv };
-    croak $@ if $@;
+
+    if (my $e = $@) {
+        if (blessed $e && $e->isa('Wight::Exception')) {
+            if ($e->is_eof && $self->{exiting}) {
+                return 1;
+            } else {
+                croak $e->message;
+            }
+        } else {
+            croak $e;
+        }
+    }
     croak $res->{error} unless exists $res->{response};
 
     return $res->{response};
@@ -224,6 +243,12 @@ sub current_url {
     my $self = shift;
     my $url = $self->call('current_url');
     return URI->new($url);
+}
+
+sub exit {
+    my $self = shift;
+    local $self->{exiting} = 1;
+    $self->call('exit');
 }
 
 foreach my $method (@METHODS) {
@@ -257,6 +282,35 @@ sub wait_until {
     $self->sleep(0.5) until $result = $code->();
     return $result;
 }
+
+package
+    Wight::Exception;
+use strict;
+use warnings;
+
+use constant EXCEPTION_MESSAGE_EOF => 'Unexpected end-of-file';
+
+sub new {
+    my ($class, $message) = @_;
+    return bless \$message, $class;
+}
+
+sub eof {
+    my $class = shift;
+    return $class->new(EXCEPTION_MESSAGE_EOF);
+}
+
+sub is_eof {
+    my $self = shift;
+    return $$self eq EXCEPTION_MESSAGE_EOF;
+}
+
+sub message {
+    my $self = shift;
+    return $$self;
+}
+
+package Wight;
 
 1;
 

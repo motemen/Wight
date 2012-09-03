@@ -18,4 +18,8 @@ pass 'got motemen.github.com';
 
 ok my $link = $wight->find('//a'), 'link found';
 
+$wight->exit;
+
+pass 'exited';
+
 done_testing;
