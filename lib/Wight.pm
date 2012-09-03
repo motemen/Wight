@@ -76,7 +76,6 @@ sub phantomjs_args {
 
 sub new {
     my ($class, %args) = @_;
-    $args{ws_handshake} ||= Protocol::WebSocket::Handshake::Server->new;
     $args{ws_port} ||= empty_port();
     return bless \%args, $class;
 }
@@ -84,10 +83,11 @@ sub new {
 sub run {
     my $self = shift;
 
-    $self->{tcp_server_guard} = tcp_server
+    $self->{ws_handshake} = Protocol::WebSocket::Handshake::Server->new;
+
+    $self->{tcp_server_guard} ||= tcp_server
         undef, $self->ws_port, $self->_tcp_server_cb;
 
-    my $cookies_file;
     if (exists $self->{cookie_jar}) {
         require File::Temp;
         my $fh = File::Temp->new(UNLINK => 0);
@@ -103,17 +103,50 @@ sub run {
             }
         }
         close $fh;
-        $cookies_file = $fh->filename;
+        $self->{cookies_file} = $fh->filename;
     }
 
     $self->{phantomjs_cv} = run_cmd [
         'phantomjs',
         '--disk-cache=yes',
         $self->phantomjs_args,
-        $cookies_file ? "--cookies-file=$cookies_file" : (),
+        $self->{cookies_file} ? "--cookies-file=$self->{cookies_file}" : (),
         $self->script_file,
         $self->ws_port,
     ], '$$' => \$self->{phantomjs_pid};
+}
+
+sub reload_cookie_jar {
+    my $self = shift;
+    my $file = $self->{cookies_file} or return undef;
+
+    open my $fh, '<', $file or die $!;
+
+    require HTTP::Cookies;
+    my $jar = HTTP::Cookies->new;
+
+    my $domain;
+    while (<$fh>) {
+        chomp;
+        if (/^\[(.+)\]$/) {
+            $domain = $1;
+        } elsif (/^([^=]+?)=(.+)$/) {
+            my ($key, $value) = ($1, $2);
+            $value =~ s/^"(.+)"$/$1/;
+
+            next unless $domain;
+            $jar->set_cookie(
+                '0',
+                $key,
+                $value,
+                '/',
+                $domain,
+                # XXX PhantomJS cookies file does not have port
+            );
+        }
+    }
+
+    return $self->{cookie_jar} = $jar;
 }
 
 *walk = \&run;
@@ -248,7 +281,7 @@ sub current_url {
 sub exit {
     my $self = shift;
     local $self->{exiting} = 1;
-    $self->call('exit');
+    return $self->call('exit');
 }
 
 foreach my $method (@METHODS) {
