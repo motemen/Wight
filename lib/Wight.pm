@@ -57,16 +57,6 @@ sub _build_cookie_jar {
     HTTP::Cookies->new;
 }
 
-sub _build_base_url {
-    my $self = shift;
-
-    croak q('psgi_port' not set) unless defined $self->psgi_port;
-
-    my $url = URI->new('http://localhost/');
-       $url->port($self->psgi_port);
-    return $url;
-}
-
 sub script_file {
     my $file = catfile(
         dirname(__FILE__), updir,
@@ -227,9 +217,7 @@ sub sleep {
 
 sub visit {
     my ($self, $url) = @_;
-    return $self->call(
-        visit => URI->new_abs($url, $self->base_url)->as_string
-    );
+    return $self->call(visit => $url);
 }
 
 sub current_url {
