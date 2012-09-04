@@ -159,8 +159,9 @@ sub reload_cookie_jar {
 
 sub _new_ws_frame {
     my ($self, $buffer) = @_;
+    my $ws = $self->ws_handshake or croak "\$wight->handshake is not invoked?";
     return Protocol::WebSocket::Frame->new(
-        version => $self->ws_handshake->version,
+        version => $ws->version,
         buffer  => $buffer,
     );
 }
