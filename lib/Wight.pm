@@ -31,6 +31,7 @@ use Class::Accessor::Lite::Lazy (
     rw => [
         'psgi_port',
         'client_cv',
+        'phantomjs',
     ],
     ro => [
         'handle',
@@ -106,14 +107,19 @@ sub run {
         $self->{cookies_file} = $fh->filename;
     }
 
+    my $cmd = $self->phantomjs || 'phantomjs';
     $self->{phantomjs_cv} = run_cmd [
-        'phantomjs',
+        $cmd,
         '--disk-cache=yes',
         $self->phantomjs_args,
         $self->{cookies_file} ? "--cookies-file=$self->{cookies_file}" : (),
         $self->script_file,
         $self->ws_port,
     ], '$$' => \$self->{phantomjs_pid};
+    $self->{phantomjs_cv}->cb(sub {
+        my $return = $_[0]->recv;
+        die "$0: $cmd: Exited with value @{[$return >> 8]}\n" if $return;
+    });
 }
 
 sub reload_cookie_jar {
