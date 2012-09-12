@@ -4,10 +4,13 @@ use Test::More;
 
 use Test::Wight;
 
-my $wight = Test::Wight->new;
+subtest "SPAWN_PSGI_METHOD - $_" => sub {
+    local $Test::Wight::SPAWN_PSGI_METHOD = $_;
 
-my $app = sub {
-    return [ 200, [ 'Content-Type' => 'text/html' ], [ <<HTML ] ];
+    my $wight = Test::Wight->new;
+
+    my $app = sub {
+        return [ 200, [ 'Content-Type' => 'text/html' ], [ <<HTML ] ];
 <html>
   <head>
     <title>01_simple</title>
@@ -25,26 +28,28 @@ function show (id) {
   </body>
 </html>
 HTML
-};
+    };
 
-my $port = $wight->spawn_psgi($app);
+    my $port = $wight->spawn_psgi($app);
 
-$wight->handshake;
+    $wight->handshake;
 
-$wight->visit("http://localhost:$port/");
-is $wight->evaluate('document.title'), '01_simple';
+    $wight->visit("http://localhost:$port/");
+    is $wight->evaluate('document.title'), '01_simple';
 
-isa_ok my $link = $wight->find('//p/a'), 'Wight::Node';
-is $link->text, 'foo';
+    isa_ok my $link = $wight->find('//p/a'), 'Wight::Node';
+    is $link->text, 'foo';
 
-$link->click;
-is $wight->current_url, "http://localhost:$port/foo";
+    $link->click;
+    is $wight->current_url, "http://localhost:$port/foo";
 
-my $hidden = $wight->find(q<id('hidden')>);
-ok !$hidden->is_visible;
-is $hidden->attribute('id'), 'hidden';
+    my $hidden = $wight->find(q<id('hidden')>);
+    ok !$hidden->is_visible;
+    is $hidden->attribute('id'), 'hidden';
 
-$wight->find('//span[@onclick]')->click;
-ok $wight->wait_until(sub { $hidden->is_visible });
+    $wight->find('//span[@onclick]')->click;
+    ok $wight->wait_until(sub { $hidden->is_visible });
+}
+foreach 'fork', 'twiggy';
 
 done_testing;
