@@ -228,8 +228,6 @@ sub _on_read_cb {
             $self->debug('message in:', $data);
             if (my $error = $data->{error}) {
                 if ($self->client_cv) {
-                    use Data::Dumper;
-                    warn Dumper $error;
                     $self->client_cv->croak($error);
                 }
                 # $self->{handle}->destroy;
