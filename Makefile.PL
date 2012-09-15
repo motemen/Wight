@@ -48,9 +48,18 @@ readme_markdown_from 'lib/Wight.pm';
 
 if ($Module::Install::AUTHOR) {
     # Insert LICENSE to javascripts
+
     require Path::Class;
+    require Cwd;
+
+    my $cwd = Cwd::cwd();
 
     my $poltergeist = Path::Class::dir('poltergeist');
+
+    chdir "$poltergeist";
+    system('rake compile') == 0 or die "rake compile: $!";
+    chdir $cwd;
+
     my $share = Path::Class::dir('share');
     my $license = $poltergeist->file('LICENSE')->slurp;
     my $js_dir = $poltergeist->subdir(qw(
