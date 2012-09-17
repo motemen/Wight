@@ -146,9 +146,13 @@ sub _psgi_app {
                 $self->handle->push_write($self->ws_handshake->to_string);
             };
         } else {
-            # TODO
-            use Data::Dumper;
-            warn Dumper $_[0];
+            return [
+                200, [
+                    'Access-Control-Allow-Origin' => '*',
+                    'Content-Type' => 'application/json; charset=utf-8',
+                ],
+                [ encode_json +{ response => time() } ], # TODO
+            ];
         }
     };
 }
