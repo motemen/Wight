@@ -105,7 +105,12 @@ sub _psgi_app {
                         my $data = JSON::XS->new->decode($message);
                         $self->debug('message in:', $data);
                         if (my $error = $data->{error}) {
-                            # TODO inflate error object
+                            if (ref $error eq 'HASH') {
+                                $error = Wight::Exception->new(
+                                    name => $error->{name},
+                                    args => $error->{args},
+                                );
+                            }
                             if ($self->client_cv) {
                                 $self->client_cv->croak($error);
                             }
@@ -327,7 +332,7 @@ sub call {
                 undef $self->{ws_handshake};
                 return 1;
             } else {
-                croak $e->message;
+                croak $e;
             }
         } else {
             croak $e;
@@ -400,27 +405,31 @@ package
     Wight::Exception;
 use strict;
 use warnings;
+use overload
+    '""' => 'stringify',
+    fallback => 1;
+
+use Class::Accessor::Lite (
+    new => 1,
+    ro  => [ 'name', 'message', 'args' ],
+);
 
 use constant EXCEPTION_MESSAGE_EOF => 'Unexpected end-of-file';
 
-sub new {
-    my ($class, $message) = @_;
-    return bless \$message, $class;
-}
-
 sub eof {
     my $class = shift;
-    return $class->new(EXCEPTION_MESSAGE_EOF);
+    return $class->new(message => EXCEPTION_MESSAGE_EOF);
 }
 
 sub is_eof {
     my $self = shift;
-    return $$self eq EXCEPTION_MESSAGE_EOF;
+    return ($self->message || '') eq EXCEPTION_MESSAGE_EOF;
 }
 
-sub message {
+sub stringify {
     my $self = shift;
-    return $$self;
+    my $msg = join ': ', grep length $_, ( $self->name, $self->message );
+    return "Wight exception $msg";
 }
 
 package Wight;
