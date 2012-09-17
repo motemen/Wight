@@ -13,6 +13,7 @@ use AnyEvent::Socket;
 use AnyEvent::Handle;
 use AnyEvent::Util;
 use Twiggy::Server;
+use Plack::Request;
 
 use Protocol::WebSocket::Handshake::Server;
 use Protocol::WebSocket::Frame;
@@ -33,6 +34,8 @@ use Class::Accessor::Lite::Lazy (
         'psgi_port',
         'client_cv',
         'phantomjs',
+        'on_confirm',
+        'on_prompt',
     ],
     ro => [
         'handle',
@@ -87,9 +90,10 @@ sub _psgi_app {
 
     return sub {
         my $env = shift;
+        my $req = Plack::Request->new($env);
 
-        if ($env->{HTTP_CONNECTION} eq 'Upgrade'
-                && $env->{HTTP_UPGRADE} eq 'WebSocket') {
+        if ($req->header('Connection') eq 'Upgrade'
+                && $req->header('Upgrade') eq 'WebSocket') {
 
             $self->{ws_handshake}
                 = Protocol::WebSocket::Handshake::Server->new_from_psgi($env);
@@ -145,14 +149,19 @@ sub _psgi_app {
                 my $respond = shift;
                 $self->handle->push_write($self->ws_handshake->to_string);
             };
-        } else {
+        } elsif (my ($action) = $req->path_info =~ m<^/(confirm|prompt)$>) {
+            my $args = eval { decode_json($req->parameters->{args}) } || [];
+            my $response = ( $self->{"on_$action"} || sub { return undef } )->($self, @$args);
+            $response = $response ? \1 : \0 if $action eq 'confirm'; # force to boolean
             return [
                 200, [
                     'Access-Control-Allow-Origin' => '*',
                     'Content-Type' => 'application/json; charset=utf-8',
                 ],
-                [ encode_json +{ response => time() } ], # TODO
+                [ encode_json +{ response => $response } ],
             ];
+        } else {
+            return [ 501, [] , [] ];
         }
     };
 }
