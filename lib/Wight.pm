@@ -12,6 +12,7 @@ use AnyEvent;
 use AnyEvent::Socket;
 use AnyEvent::Handle;
 use AnyEvent::Util;
+use Twiggy::Server;
 
 use Protocol::WebSocket::Handshake::Server;
 use Protocol::WebSocket::Frame;
@@ -81,13 +82,82 @@ sub new {
     return bless \%args, $class;
 }
 
+sub _psgi_app {
+    my $self = shift;
+
+    return sub {
+        my $env = shift;
+
+        if ($env->{HTTP_CONNECTION} eq 'Upgrade'
+                && $env->{HTTP_UPGRADE} eq 'WebSocket') {
+
+            $self->{ws_handshake}
+                = Protocol::WebSocket::Handshake::Server->new_from_psgi($env);
+
+            my $frame = $self->_new_ws_frame;
+
+            my $fh = $env->{'psgix.io'};
+            $self->{handle} = AnyEvent::Handle->new(
+                fh => $fh,
+                on_read => sub {
+                    $frame->append($_[0]->rbuf);
+                    while (my $message = $frame->next) {
+                        my $data = JSON::XS->new->decode($message);
+                        $self->debug('message in:', $data);
+                        if (my $error = $data->{error}) {
+                            # TODO inflate error object
+                            if ($self->client_cv) {
+                                $self->client_cv->croak($error);
+                            }
+                            # $self->{handle}->destroy;
+                            # return;
+                        }
+                        $self->client_cv->send($data) if $self->client_cv;
+                    }
+                },
+                on_error => sub {
+                    my ($handle, $fatal, $msg) = @_;
+                    $handle->destroy;
+                    if ($self->client_cv) {
+                        $self->client_cv->croak($msg);
+                    }
+                },
+                on_eof => sub {
+                    my ($handle) = @_;
+                    $handle->destroy;
+                    if ($self->client_cv) {
+                        $self->client_cv->croak(Wight::Exception->eof);
+                    }
+                }
+            );
+
+            $self->ws_handshake->parse($fh) or do {
+                warn $self->ws_handshake->error;
+                return [ 400, [], [ $self->ws_handshake->error ] ];
+            };
+
+            return sub {
+                my $respond = shift;
+                $self->handle->push_write($self->ws_handshake->to_string);
+            };
+        } else {
+            # TODO
+            use Data::Dumper;
+            warn Dumper $_[0];
+        }
+    };
+}
+
 sub run {
     my $self = shift;
 
-    $self->{ws_handshake} = Protocol::WebSocket::Handshake::Server->new;
+#   $self->{tcp_server_guard} ||= tcp_server
+#       undef, $self->ws_port, $self->_tcp_server_cb;
 
-    $self->{tcp_server_guard} ||= tcp_server
-        undef, $self->ws_port, $self->_tcp_server_cb;
+    $self->{twiggy} = Twiggy::Server->new(
+        port => $self->ws_port
+    );
+    $self->{twiggy}->register_service($self->_psgi_app);
 
     if (exists $self->{cookie_jar}) {
         require File::Temp;
@@ -148,7 +218,6 @@ sub reload_cookie_jar {
                 $value,
                 '/',
                 $domain,
-                # XXX PhantomJS cookies file does not have port
             );
         }
     }
@@ -170,7 +239,7 @@ sub _new_ws_frame {
 sub handshake {
     my $self = shift;
     $self->run;
-    $self->wait_until(sub { $self->ws_handshake->is_done });
+    $self->wait_until(sub { $self->ws_handshake && $self->ws_handshake->is_done });
 }
 
 sub _tcp_server_cb {
@@ -253,6 +322,9 @@ sub call {
     if (my $e = $@) {
         if (blessed $e && $e->isa('Wight::Exception')) {
             if ($e->is_eof && $self->{exiting}) {
+                $self->{twiggy}->{exit_guard}->send;
+                undef $self->{twiggy};
+                undef $self->{ws_handshake};
                 return 1;
             } else {
                 croak $e->message;

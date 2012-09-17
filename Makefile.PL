@@ -16,6 +16,8 @@ requires 'AnyEvent::Socket';
 requires 'AnyEvent::Handle';
 requires 'AnyEvent::Util';
 
+requires 'Twiggy';
+
 requires 'Protocol::WebSocket';
 requires 'JSON::XS';
 
