@@ -2,7 +2,7 @@ package Wight::jQuery;
 use strict;
 use warnings;
 use overload
-    '""'  => '__as_javascript_string',
+    '""'  => 'TO_JSON',
     '&{}' => '__add_arguments',
     '.'   => '__chain_property',
     fallback => 1;
@@ -24,7 +24,7 @@ sub __new {
     return bless \@chain, $class;
 }
 
-sub __as_javascript_string {
+sub TO_JSON {
     my $self = shift;
     return join '.', map {
         my ($method, $args) = @$_;

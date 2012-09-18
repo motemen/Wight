@@ -343,7 +343,7 @@ sub call {
 
     $self->debug('message out:', $message);
 
-    my $frame = $self->_new_ws_frame(encode_json $message);
+    my $frame = $self->_new_ws_frame(JSON::XS->new->utf8->convert_blessed->encode($message));
     $self->handle->push_write($frame->to_bytes);
 
     my $res = eval { $self->client_cv(AE::cv)->recv };
