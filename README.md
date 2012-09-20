@@ -9,7 +9,6 @@ Wight - Communicate with PhantomJS
     my $wight = Wight->new;
 
     $wight->spawn_psgi('app.psgi');
-    $wight->handshake;
 
     $wight->visit('/');
     $wight->evaluate('document.title'); # => evaluates JavaScript expression
