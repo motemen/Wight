@@ -8,7 +8,6 @@ unless ($ENV{TEST_LIVE}) {
 }
 
 my $wight = Wight->new;
-$wight->handshake;
 
 pass 'handshaked';
 

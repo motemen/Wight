@@ -81,8 +81,17 @@ sub phantomjs_args {
 
 sub new {
     my ($class, %args) = @_;
+
     $args{ws_port} ||= empty_port();
-    return bless \%args, $class;
+
+    my $autorun = exists $args{autorun} ? delete $args{autorun} : 1;
+    my $cookie  = delete $args{cookie};
+
+    my $self = bless \%args, $class;
+    $self->cookie_jar if $cookie; # build
+    $self->handshake if $autorun;
+
+    return $self;
 }
 
 sub _psgi_app {
@@ -172,6 +181,8 @@ sub run {
 #   $self->{tcp_server_guard} ||= tcp_server
 #       undef, $self->ws_port, $self->_tcp_server_cb;
 
+    return if $self->{twiggy};
+
     $self->{twiggy} = Twiggy::Server->new(
         port => $self->ws_port
     );
@@ -199,7 +210,7 @@ sub run {
     $self->{phantomjs_cv} = run_cmd [
         $cmd,
         '--disk-cache=yes',
-        '--load-images=no',
+#       '--load-images=no',
         $self->phantomjs_args,
         $self->{cookies_file} ? "--cookies-file=$self->{cookies_file}" : (),
         $self->script_file,

@@ -21,12 +21,9 @@ my $app = sub {
 };
 $app = Plack::Middleware::Session->new->wrap($app);
 
-my $wight = Test::Wight->new;
-$wight->cookie_jar; # build; FIXME ugly
+my $wight = Test::Wight->new(cookie => 1);
 
 my $port = $wight->spawn_psgi($app);
-
-$wight->handshake;
 
 $wight->visit("http://127.0.0.1:$port/");
 my $session_id = $wight->evaluate('document.body.textContent');

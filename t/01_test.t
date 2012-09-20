@@ -32,8 +32,6 @@ HTML
 
     my $port = $wight->spawn_psgi($app);
 
-    $wight->handshake;
-
     $wight->visit("http://localhost:$port/");
     is $wight->evaluate('document.title'), '01_simple';
 

@@ -22,8 +22,6 @@ HTML
 my $wight = Test::Wight->new;
 my $port = $wight->spawn_psgi($app);
 
-$wight->handshake;
-
 $wight->visit("http://localhost:$port/");
 
 my $e1 = exception {

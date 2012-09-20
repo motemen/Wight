@@ -22,8 +22,6 @@ HTML
 
 my $port = $wight->spawn_psgi($app);
 
-$wight->handshake;
-
 $wight->visit("http://localhost:$port/");
 is $wight->evaluate('document.body.innerHTML.replace(/\s+$/, "")'), '1234567890', '10 bytes';
 

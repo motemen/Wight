@@ -22,8 +22,6 @@ HTML
 
 my $port = $wight->spawn_psgi($app);
 
-$wight->handshake;
-
 $wight->visit("http://localhost:$port/");
 
 $wight->find('id("button-prompt")')->click;
