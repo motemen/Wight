@@ -32,7 +32,7 @@ HTML
 
     my $port = $wight->spawn_psgi($app);
 
-    $wight->visit("http://localhost:$port/");
+    $wight->visit('/');
     is $wight->evaluate('document.title'), '01_simple';
 
     isa_ok my $link = $wight->find('//p/a'), 'Wight::Node';
