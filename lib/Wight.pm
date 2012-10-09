@@ -472,9 +472,7 @@ Wight - Communicate with PhantomJS
 
   my $wight = Wight->new;
 
-  $wight->spawn_psgi('app.psgi');
-
-  $wight->visit('/');
+  $wight->visit('http://example.com/');
   $wight->evaluate('document.title'); # => evaluates JavaScript expression
 
   $wight->find('//a[@rel="next"]')->click;
@@ -486,9 +484,37 @@ especially intended to be used testing web application.
 
 For client side scripting, uses L<poltergeist|https://github.com/jonleighton/poltergeist>'s JavaScript.
 
+=head1 WARNING
+
+B<This module is currently under development and interfaces are
+subject to change.>
+
+=head1 INITIALIZATION
+
+  my $wight = Wight->new(%args);
+
+I<%args> accepts keys below:
+
+=over 4
+
+=item autorun => 1
+
+Automatically runs PhantomJS and waits for it.
+Defaults to true, otherwise you will call C<handshake> explicitly.
+
+=item phantomjs => 'phantomjs'
+
+Specifies PhantomJS command. Defaults to 'phantomjs'.
+
+=item cookie_jar => $HTTP_Cookies
+
+Supply browser cookies.
+
+=back
+
 =head1 BROWSER METHODS
 
-Every method croaks if the operation was failed.
+Every method croaks if the operation failed.
 
 =over 4
 
@@ -566,14 +592,16 @@ motemen E<lt>motemen@gmail.comE<gt>
 
 =head1 SEE ALSO
 
-L<poltergeist|https://github.com/jonleighton/poltergeist>
+L<Poltergeist|https://github.com/jonleighton/poltergeist>
 
 =head1 LICENSE
+
+=head2 Wight itself (Perl part):
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
-For JavaScripts from poltergeist:
+=head2 JavaScripts from Poltergeist:
 
 Copyright (c) 2011 Jonathan Leighton
 
