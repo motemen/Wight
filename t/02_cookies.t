@@ -1,12 +1,18 @@
 use strict;
 use warnings;
 use Test::More;
+use Test::Requires qw(
+    Plack::Middleware::Session
+    Plack::Session
+    Plack::Request;
+    LWP::Simple
+);
 
 use Test::Wight;
-use Plack::Request;
-use Plack::Middleware::Session;
-use Plack::Session;
-use LWP::Simple qw($ua);
+
+BEGIN {
+    import LWP::Simple qw($ua);
+};
 
 # XXX HTTP::Cookies adds '.local' to 'localhost' domain
 # So access to localhost by '127.0.0.1'

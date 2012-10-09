@@ -40,6 +40,7 @@ requires 'HTTP::Cookies';
 requires 'File::Temp';
 
 test_requires 'Test::More';
+test_requires 'Test::Requires';
 
 requires_external_bin 'phantomjs';
 
