@@ -8,7 +8,7 @@ MANIFEST
 Makefile.old
 nytprof.out
 MANIFEST.bak
-*.sw[po]
+*.sw?
 MYMETA.yml
 MYMETA.json
 .carton/
@@ -17,3 +17,5 @@ local/
 .prove
 Debian_CPANTS.txt
 share/
+sketch/
+.DS_Store

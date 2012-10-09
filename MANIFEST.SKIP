@@ -1,3 +1,4 @@
+\.DS_Store$
 \bRCS\b
 \bCVS\b
 ^MANIFEST\.
@@ -18,7 +19,9 @@
 ^[^/]+\.pl$
 ^\.shipit$
 ^\.git/
-\.sw[po]$
+^\.gitignore$
+^\.gitmodules$
+\.sw.$
 \.prove$
 ^MYMETA\.
 Debian_CPANTS.txt
@@ -27,3 +30,5 @@ Debian_CPANTS.txt
 ^\.carton/
 ^cover_db/
 ^poltergeist/
+^sketch/
+^Wight-\d\.\d+
