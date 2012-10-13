@@ -404,7 +404,8 @@ foreach my $method (@METHODS) {
 
 sub find {
     my ($self, $selector) = @_;
-    my $result = $self->call(find => $selector);
+    my $xpath = $selector =~ m!^(?:/|id\()! ? $selector : HTML::Selector::XPath::selector_to_xpath($selector);
+    my $result = $self->call(find => $xpath);
     my $ids = $result->{ids};
     return unless $ids && @$ids;
 

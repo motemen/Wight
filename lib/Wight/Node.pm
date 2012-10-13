@@ -30,7 +30,8 @@ foreach my $method (@METHODS) {
 sub find {
     my ($self, $selector) = @_;
     my $class = ref $self;
-    my $id = $self->wight->call(find_within => $self->page_id, $self->id, $selector) or return;
+    my $xpath = $selector =~ m!^(?:/|id\()! ? $selector : HTML::Selector::XPath::selector_to_xpath($selector);
+    my $id = $self->wight->call(find_within => $self->page_id, $self->id, $xpath) or return;
     return $class->new(%$self, id => $id);
 }
 
