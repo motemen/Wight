@@ -38,6 +38,9 @@ HTML
     isa_ok my $link = $wight->find('//p/a'), 'Wight::Node';
     is $link->text, 'foo';
 
+    isa_ok my $link2 = $wight->find('p a'), 'Wight::Node';
+    is $link2->text, 'foo', 'css selector';
+
     $link->click;
     is $wight->current_url, "http://localhost:$port/foo";
 
