@@ -35,3 +35,45 @@ sub find {
 }
 
 1
+__END__
+
+=head1 NAME
+
+Wight::Node - node object
+
+=head1 METHODS
+
+=over 4
+
+=item $node->find($selector)
+
+Find nodes from child nodes.
+
+=item $node->wight()
+
+Get a instance of L<Wight>.
+
+=item $node->click()
+
+=item $node->set($value)
+
+=item $node->text()
+
+=item $node->is_visible()
+
+=item $node->attribute()
+
+=item $node->value()
+
+=item $node->tag_name()
+
+=item $node->drag($other)
+
+=item $node->select()
+
+=item $node->trigger($event)
+
+=item $node->select_file()
+
+=back
+
