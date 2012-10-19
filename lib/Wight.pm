@@ -19,6 +19,8 @@ use Protocol::WebSocket::Handshake::Server;
 use Protocol::WebSocket::Frame;
 use JSON::XS;
 
+use HTML::Selector::XPath ();
+
 use File::Basename qw(dirname);
 use File::Spec::Functions qw(catfile updir);
 use File::ShareDir qw(dist_file);
