@@ -226,34 +226,25 @@ sub run {
 
 sub reload_cookie_jar {
     my $self = shift;
-    my $file = $self->{cookies_file} or return undef;
-
-    open my $fh, '<', $file or die $!;
 
     require HTTP::Cookies;
-    my $jar = HTTP::Cookies->new;
 
-    my $domain;
-    while (<$fh>) {
-        chomp;
-        if (/^\[(.+)\]$/) {
-            $domain = $1;
-        } elsif (/^([^=]+?)=(.+)$/) {
-            my ($key, $value) = ($1, $2);
-            $value =~ s/^"(.+)"$/$1/;
-
-            next unless $domain;
-            $jar->set_cookie(
-                '0',
-                $key,
-                $value,
-                '/',
-                $domain,
-            );
-        }
+    my $cookies = $self->call('cookies');
+    my $cookie_jar = HTTP::Cookies->new;
+    foreach (@$cookies) {
+        $cookie_jar->set_cookie(
+            '0',
+            $_->{name},
+            $_->{value},
+            $_->{path},
+            $_->{domain},
+            undef, # port
+            undef, # path_spec
+            $_->{secure},
+        );
     }
 
-    return $self->{cookie_jar} = $jar;
+    return $self->{cookie_jar} = $cookie_jar;
 }
 
 *walk = \&run;
