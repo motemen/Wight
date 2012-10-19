@@ -39,6 +39,8 @@ requires 'Plack::Runner';
 requires 'HTTP::Cookies';
 requires 'File::Temp';
 
+requires 'HTML::Selector::XPath';
+
 test_requires 'Test::More';
 test_requires 'Test::Requires';
 
