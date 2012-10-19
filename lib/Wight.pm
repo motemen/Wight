@@ -17,7 +17,7 @@ use Plack::Request;
 
 use Protocol::WebSocket::Handshake::Server;
 use Protocol::WebSocket::Frame;
-use JSON::XS;
+use JSON;
 
 use HTML::Selector::XPath ();
 
@@ -117,7 +117,7 @@ sub _psgi_app {
                 on_read => sub {
                     $frame->append($_[0]->rbuf);
                     while (my $message = $frame->next) {
-                        my $data = JSON::XS->new->decode($message);
+                        my $data = JSON->new->decode($message);
                         $self->debug('message in:', $data);
                         if (my $error = $data->{error}) {
                             if (ref $error eq 'HASH') {
@@ -324,7 +324,7 @@ sub _on_read_cb {
         $frame->append($chunk);
 
         while (my $message = $frame->next) {
-            my $data = JSON::XS->new->decode($message);
+            my $data = JSON->new->decode($message);
             $self->debug('message in:', $data);
             if (my $error = $data->{error}) {
                 if ($self->client_cv) {

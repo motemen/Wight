@@ -19,7 +19,7 @@ requires 'AnyEvent::Util';
 requires 'Twiggy';
 
 requires 'Protocol::WebSocket';
-requires 'JSON::XS';
+requires 'JSON';
 
 requires 'File::Basename';
 requires 'File::Spec::Functions';
