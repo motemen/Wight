@@ -56,7 +56,6 @@ our @METHODS = qw(
     execute evaluate render
     body source reset resize push_frame pop_frame
 );
-# within_frame
 
 our @CARP_NOT = 'Wight::Node';
 
@@ -378,6 +377,14 @@ sub current_url {
     my $self = shift;
     my $url = $self->call('current_url');
     return URI->new($url);
+}
+
+sub within_frame {
+    my ($self, $name, $block) = @_;
+    $self->call(push_frame => $name);
+    eval { $block->() };
+    $self->call('pop_frame');
+    die if $@;
 }
 
 sub exit {
