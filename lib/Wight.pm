@@ -354,7 +354,7 @@ sub call {
             croak $e;
         }
     }
-    croak $res->{error} unless exists $res->{response};
+    croak $res->{error} if !exists $res->{response} && defined $res->{error};
 
     return $res->{response};
 }
