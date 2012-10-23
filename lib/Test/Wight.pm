@@ -81,4 +81,15 @@ sub _build_base_url {
     return $url;
 }
 
+sub cleanup {
+    my $self = shift;
+    foreach (keys %{ $self->{test_tcp} || {} }) {
+        # XXX workaround for Plack::Runner does not die
+        # on TERM signal sent by TEST::TCP
+        my $test_tcp = delete $self->{test_tcp}->{$_};
+        kill KILL => $test_tcp->{pid};
+    }
+    $self->SUPER::cleanup;
+}
+
 1;

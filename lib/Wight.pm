@@ -352,10 +352,8 @@ sub call {
 
     if (my $e = $@) {
         if (blessed $e && $e->isa('Wight::Exception')) {
+            $self->cleanup;
             if ($e->is_eof && $self->{exiting}) {
-                $self->{twiggy}->{exit_guard}->send;
-                undef $self->{twiggy};
-                undef $self->{ws_handshake};
                 return 1;
             } else {
                 croak $e;
@@ -387,6 +385,13 @@ sub current_url {
     my $self = shift;
     my $url = $self->call('current_url');
     return URI->new($url);
+}
+
+sub cleanup {
+    my $self = shift;
+    $self->{twiggy}->{exit_guard}->send;
+    undef $self->{twiggy};
+    undef $self->{ws_handshake};
 }
 
 sub exit {

@@ -42,6 +42,7 @@ requires 'File::Temp';
 requires 'HTML::Selector::XPath';
 
 test_requires 'Test::More';
+test_requires 'Test::Fatal';
 test_requires 'Test::Requires';
 
 requires_external_bin 'phantomjs';
