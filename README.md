@@ -69,6 +69,10 @@ Finds a node within current page and returns a (list of) [Wight::Node](http://se
 
 Renders current page to local file.
 
+- $wight->set\_headers(\\%headers)
+
+Set request headers.
+
 # NODE METHODS
 
 Every method croaks if the operation was failed.
