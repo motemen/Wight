@@ -55,6 +55,7 @@ our $VERSION = '0.01';
 our @METHODS = qw(
     execute evaluate render
     body source reset resize push_frame pop_frame
+    set_headers
 );
 
 our @CARP_NOT = 'Wight::Node';
@@ -540,6 +541,10 @@ Finds a node within current page and returns a (list of) L<Wight::Node>.
 =item $wight->render($file)
 
 Renders current page to local file.
+
+=item $wight->set_headers(\%headers)
+
+Set request headers.
 
 =back
 
