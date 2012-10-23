@@ -47,6 +47,15 @@ test_requires 'Test::Requires';
 
 requires_external_bin 'phantomjs';
 
+# Check PhantomJS version
+my $phantomjs_version = qx(phantomjs --version);
+chomp $phantomjs_version;
+unless ($phantomjs_version ge '1.7.0') {
+    print "PhantomJS >= 1.7.0 required. (got: $phantomjs_version)\n";
+    print STDERR "NA: Unable to build distribution on this platform.\n";
+    exit 0;
+}
+
 auto_set_repository;
 auto_include_deps;
 

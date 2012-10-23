@@ -55,8 +55,8 @@ our $VERSION = '0.01';
 our @METHODS = qw(
     execute evaluate render
     body source reset resize push_frame pop_frame
+    set_headers
 );
-# within_frame
 
 our @CARP_NOT = 'Wight::Node';
 
@@ -226,34 +226,25 @@ sub run {
 
 sub reload_cookie_jar {
     my $self = shift;
-    my $file = $self->{cookies_file} or return undef;
-
-    open my $fh, '<', $file or die $!;
 
     require HTTP::Cookies;
-    my $jar = HTTP::Cookies->new;
 
-    my $domain;
-    while (<$fh>) {
-        chomp;
-        if (/^\[(.+)\]$/) {
-            $domain = $1;
-        } elsif (/^([^=]+?)=(.+)$/) {
-            my ($key, $value) = ($1, $2);
-            $value =~ s/^"(.+)"$/$1/;
-
-            next unless $domain;
-            $jar->set_cookie(
-                '0',
-                $key,
-                $value,
-                '/',
-                $domain,
-            );
-        }
+    my $cookies = $self->call('cookies');
+    my $cookie_jar = HTTP::Cookies->new;
+    foreach (@$cookies) {
+        $cookie_jar->set_cookie(
+            '0',
+            $_->{name},
+            $_->{value},
+            $_->{path},
+            $_->{domain},
+            undef, # port
+            undef, # path_spec
+            $_->{secure},
+        );
     }
 
-    return $self->{cookie_jar} = $jar;
+    return $self->{cookie_jar} = $cookie_jar;
 }
 
 *walk = \&run;
@@ -362,7 +353,7 @@ sub call {
             croak $e;
         }
     }
-    croak $res->{error} unless exists $res->{response};
+    croak $res->{error} if !exists $res->{response} && defined $res->{error};
 
     return $res->{response};
 }
@@ -385,6 +376,14 @@ sub current_url {
     my $self = shift;
     my $url = $self->call('current_url');
     return URI->new($url);
+}
+
+sub within_frame {
+    my ($self, $name, $block) = @_;
+    $self->call(push_frame => $name);
+    eval { $block->() };
+    $self->call('pop_frame');
+    die if $@;
 }
 
 sub cleanup {
@@ -547,6 +546,10 @@ Finds a node within current page and returns a (list of) L<Wight::Node>.
 =item $wight->render($file)
 
 Renders current page to local file.
+
+=item $wight->set_headers(\%headers)
+
+Set request headers.
 
 =back
 

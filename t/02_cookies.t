@@ -14,9 +14,6 @@ BEGIN {
     import LWP::Simple qw($ua);
 };
 
-# XXX HTTP::Cookies adds '.local' to 'localhost' domain
-# So access to localhost by '127.0.0.1'
-
 my $app = sub {
     my $env = shift;
     my $req = Plack::Request->new($env);
