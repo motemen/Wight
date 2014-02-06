@@ -33,16 +33,16 @@ _%args_ accepts keys below:
 
 - autorun => 1
 
-Automatically runs PhantomJS and waits for it.
-Defaults to true, otherwise you will call `handshake` explicitly.
+    Automatically runs PhantomJS and waits for it.
+    Defaults to true, otherwise you will call `handshake` explicitly.
 
 - phantomjs => 'phantomjs'
 
-Specifies PhantomJS command. Defaults to 'phantomjs'.
+    Specifies PhantomJS command. Defaults to 'phantomjs'.
 
 - cookie\_jar => $HTTP\_Cookies
 
-Supply browser cookies.
+    Supply browser cookies.
 
 # BROWSER METHODS
 
@@ -50,28 +50,28 @@ Every method croaks if the operation failed.
 
 - $wight->visit($path)
 
-Opens a web page.
+    Opens a web page.
 
 - my $result = $wight->evaluate($javascript\_expression)
 
-Evaluates a JavaScript expression and returns its result.
+    Evaluates a JavaScript expression and returns its result.
 
 - $wight->execute($javascript\_statement)
 
-Executes JavaScript statements.
+    Executes JavaScript statements.
 
 - my $node  = $wight->find($xpath)
 - my @nodes = $wight->find($xpath)
 
-Finds a node within current page and returns a (list of) [Wight::Node](http://search.cpan.org/perldoc?Wight::Node).
+    Finds a node within current page and returns a (list of) [Wight::Node](http://search.cpan.org/perldoc?Wight::Node).
 
 - $wight->render($file)
 
-Renders current page to local file.
+    Renders current page to local file.
 
 - $wight->set\_headers(\\%headers)
 
-Set request headers.
+    Set request headers.
 
 # NODE METHODS
 
@@ -85,13 +85,13 @@ Every method croaks if the operation was failed.
 
 - my $port = $wight->spawn\_psgi($file\_or\_code)
 
-Forks and runs specified PSGI application.
-Sets its `base_url` to "http://localhost:_$port_/".
+    Forks and runs specified PSGI application.
+    Sets its `base_url` to "http://localhost:_$port_/".
 
 - $wight->handshake
 
-Starts PhantomJS and waits for communication established.
-After this, you can call BROWSER METHODS above.
+    Starts PhantomJS and waits for communication established.
+    After this, you can call BROWSER METHODS above.
 
 - $wight->base\_url($url);
 
@@ -100,7 +100,7 @@ After this, you can call BROWSER METHODS above.
 - $wight->sleep($secs)
 - $wight->wait\_until(\\&code)
 
-Stops execution until _code_ returns a true value.
+    Stops execution until _code_ returns a true value.
 
 # AUTHOR
 

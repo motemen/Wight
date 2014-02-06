@@ -41,7 +41,7 @@ requires 'File::Temp';
 
 requires 'HTML::Selector::XPath';
 
-test_requires 'Test::More';
+test_requires 'Test::More', 1;
 test_requires 'Test::Fatal';
 test_requires 'Test::Requires';
 
