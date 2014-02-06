@@ -69,10 +69,13 @@ if ($Module::Install::AUTHOR) {
 
     my $cwd = Cwd::cwd();
 
+    system('git submodule update --init') == 0 or die "git submodule update --init: $!";
+
     my $poltergeist = Path::Class::dir('poltergeist');
 
     chdir "$poltergeist";
-    system('rake compile') == 0 or die "rake compile: $!";
+    system('bundle install') == 0 or die "bundle install $!";
+    system('bundle exec rake compile') == 0 or die "rake compile: $!";
     chdir $cwd;
 
     my $share = Path::Class::dir('share');
