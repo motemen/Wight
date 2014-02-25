@@ -1,4 +1,7 @@
 Revision history for Perl extension Wight
 
+0.02    Tue Feb 25 09:37:51 JST 2014
+        - Added selector support to find() (thanks to tokuhirom)
+
 0.01    Wed Jun 13 00:48:39 2012
         - original version
